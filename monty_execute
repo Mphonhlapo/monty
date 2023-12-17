@@ -1,0 +1,74 @@
+#include "monty.h"
+
+/**
+ * find_instruction - finds the corresponding instruction function
+ * @op: opcode
+ * @stack: stack
+ * @counter: line_counter
+ * Return: function pointer or NULL if not found
+ */
+void (*find_instruction(char *op))(stack_t **, unsigned int)
+{
+	unsigned int i;
+	extern instruction_t opst[];
+
+	for (i = 0; opst[i].opcode && op; i++)
+	{
+		if (strcmp(op, opst[i].opcode) == 0)
+			return (opst[i].f);
+	}
+
+	return (NULL);
+}
+
+/**
+ * handle_unknown_instruction - handles unknown instruction case
+ * @op: opcode
+ * @counter: line_counter
+ * @file: pointer to monty file
+ * @content: line content
+ * @stack: stack
+ */
+void handle_unknown_instruction(char *op, unsigned int counter, FILE *file, char *content, stack_t **stack)
+{
+	fprintf(stderr, "L%d: unknown instruction %s\n", counter, op);
+	fclose(file);
+	free(content);
+	free_stack(*stack);
+	exit(EXIT_FAILURE);
+}
+
+/**
+ * execute - executes the opcode
+ * @content: line content
+ * @stack: head linked list - stack
+ * @counter: line_counter
+ * @file: pointer to monty file
+ * Return: 0 if successful, 1 otherwise
+ */
+int execute(char *content, stack_t **stack, unsigned int counter, FILE *file)
+{
+	char *op;
+	void (*instruction)(stack_t **, unsigned int);
+
+	op = strtok(content, " \n\t");
+
+	/* Ignore comments */
+	if (op && op[0] == '#')
+		return (0);
+
+	bus.arg = strtok(NULL, " \n\t");
+
+	instruction = find_instruction(op);
+
+	if (instruction != NULL)
+	{
+		instruction(stack, counter);
+		return (0);
+	}
+
+	if (op)
+		handle_unknown_instruction(op, counter, file, content, stack);
+
+	return (1);
+}

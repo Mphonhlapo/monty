@@ -47,6 +47,7 @@ typedef struct bus_s
 /* External variable to carry values through the program */
 extern bus_t bus;
 
+
 /**
  * struct instruction_s - Opcode and its corresponding function.
  * @opcode: The opcode.
